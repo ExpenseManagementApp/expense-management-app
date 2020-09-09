@@ -1,35 +1,50 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const dotENV = require('dotenv');
+const morgan = require('morgan');
 const path = require('path');
-const PORT = process.env.PORT || 3000;
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const { handleError, ErrorHandler } = require('./helpers/error');
+require('dotenv').config(); // settingup environment variables
 
+// importing routes
+const authRoute = require('./routes/auth');
 
 const app = express();
-dotENV.config();
-app.use(express.json());
+app.use(express.json()); // json parser
+app.use(express.static(path.join(__dirname, 'public'))); // serving static files
+process.env.NODE_ENV === 'development' && app.use(morgan('dev')); // logging middleware
 
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
-//MongoDB Connection
+// Connecting to mongodb
 mongoose.connect(
-    'mongodb://localhost/expensesData', {
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false
-    },
-    () => console.log('connect to DATABASE')
+  process.env.DATABASE_URL,
+  {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+  },
+  (err) => {
+    if (!err) {
+      console.log(`[ SUCCESS ] DB connected! 😋`);
+      return;
+    }
+    console.log(`[ FAILED ] couldn't connect to DB.`);
+  }
 );
 
+// Registering routes
+app.use('/api/v1', authRoute);
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.all('*', (req, res) => {
+  throw new ErrorHandler(404, `The page you are looking for was not there.`);
+});
+app.use((err, req, res, next) => handleError(err, res));
 
-
-app.listen(PORT, () => console.log('Server is start'));
+// Starting server
+const $PORT = process.env.PORT || 3000;
+app.listen($PORT, () =>
+  console.log(`[ SUCCESS ] Server is Listening on http://localhost:${$PORT} 🚀`)
+);
