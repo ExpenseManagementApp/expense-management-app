@@ -1,54 +1,45 @@
 const mongoose = require('mongoose');
 
-//Create Scheme or Database
-const userSchema = new mongoose.Schema({
-    username: {
+const DBUser = mongoose.model(
+  'User',
+  new mongoose.Schema(
+    {
+      username: {
         type: String,
         required: true,
         min: 6
-    },
-    email: {
+      },
+      email: {
         type: String,
         required: true,
         unique: true,
         max: 255,
         min: 6
-    },
-    password: {
+      },
+      password: {
         type: String,
         required: true,
         min: 6
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    },
-    /* For expiring JWTs */
-    sessions: {
-        type: Array,
-        required: true,
-        default: []
-    },
-
-    /* Password resets */
-    resetPasswordToken: {
+      },
+      salt: {
+        type: String,
+        required: true
+      },
+      resetPasswordToken: {
         type: String,
         default: null
-    },
-
-    resetPasswordTokenExpires: {
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    name: {
+      },
+      name: {
         type: String,
         default: null
-    },
-    avatar: {
+      },
+      avatar: {
         type: Buffer,
         default: null
-    }
-});
+      }
+    },
+    { timestamps: true }
+  )
+);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = DBUser;
