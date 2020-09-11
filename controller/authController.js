@@ -1,5 +1,4 @@
 const DBUser = require('../models/user');
-var crypto = require('crypto');
 const {
   signupValidator,
   signinValidator
