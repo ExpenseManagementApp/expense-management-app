@@ -84,14 +84,18 @@ module.exports = {
             token
           });
         } else {
-          res.status(400).json({
-            message: 'Password Incorrect!'
-          });
+          throw new ErrorHandler(
+            400,
+            'Password not Exist, Please Check Password or Forget Password.'
+          );
+          return;
         }
       } else {
-        res.status(400).json({
-          message: 'User Not Exist!'
-        });
+        throw new ErrorHandler(
+          400,
+          'User Not Exist, Please Check UserName.'
+        );
+        return;
       }
     } catch (err) {
       next(err);
