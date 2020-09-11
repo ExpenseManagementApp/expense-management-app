@@ -13,6 +13,7 @@ const {
 const {
   generateToken
 } = require('../helpers/token');
+const e = require('express');
 
 module.exports = {
   signupHandler: async (req, res, next) => {
@@ -38,8 +39,6 @@ module.exports = {
         hash,
         salt
       } = hashPwd(req.body.password);
-
-      console.log(createHash(req.body.password))
 
       const user = await DBUser.create({
         username: req.body.username,
@@ -84,7 +83,15 @@ module.exports = {
             message: 'User Login Successfully!',
             token
           });
+        } else {
+          res.status(400).json({
+            message: 'Password Incorrect!'
+          });
         }
+      } else {
+        res.status(400).json({
+          message: 'User Not Exist!'
+        });
       }
     } catch (err) {
       next(err);
